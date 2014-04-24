@@ -1,3 +1,9 @@
+IMPORTANT
+=========
+
+This fork is for converted this code from Python3 back to Python2.7+.
+
+
 Quick2Wire Python API
 =====================
 
