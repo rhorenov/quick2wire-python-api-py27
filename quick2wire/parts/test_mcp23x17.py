@@ -1,10 +1,12 @@
 
+from __future__ import with_statement
 from itertools import product, permutations, count
 from warnings import catch_warnings, simplefilter as issue_warnings
 import quick2wire.parts.mcp23x17 as mcp23x17
 from quick2wire.parts.mcp23x17 import *
 from quick2wire.parts.mcp23x17 import _banked_register
 from factcheck import *
+from itertools import izip
 
 bits = from_range(2)
 bank_ids = from_range(2)
@@ -44,8 +46,8 @@ def test_can_use_a_context_manager_to_claim_ownership_of_a_pin_in_a_bank_and_rel
     with chip[b][p] as pin:
         try:
             with chip[b][p] as pin2:
-                raise AssertionError("claiming the pin should have failed")
-        except ValueError as e:
+                raise AssertionError(u"claiming the pin should have failed")
+        except ValueError, e:
             pass
 
 
@@ -74,7 +76,7 @@ def test_resets_iocon_before_other_registers():
 
 @forall(intpol=bits, odr=bits, mirror=bits, samples=4)
 def test_can_set_configuration_of_chip_on_reset(intpol, odr, mirror):
-    """Note: IOCON is duplicated in both banks so only need to test the contents in one bank"""
+    u"""Note: IOCON is duplicated in both banks so only need to test the contents in one bank"""
     
     chip.reset(interrupt_polarity=intpol, interrupt_open_drain=odr, interrupt_mirror=mirror)
     
@@ -274,7 +276,7 @@ def test_issues_warning_if_interrupt_enabled_when_pin_is_in_immediate_read_mode(
         pin.bank.read_mode = immediate_read
         
         with catch_warnings(record=True) as warnings:
-            issue_warnings("always")
+            issue_warnings(u"always")
             
             pin.enable_interrupts(value=1)
             
@@ -287,11 +289,11 @@ def test_issues_no_warning_if_interrupt_enabled_when_pin_is_in_deferred_read_mod
         pin.bank.read_mode = deferred_read
         
         with catch_warnings(record=True) as warnings:
-            issue_warnings("always")
+            issue_warnings(u"always")
             
             pin.enable_interrupts()
             
-            print(warnings)
+            print warnings
             assert len(warnings) == 0
 
 
@@ -304,7 +306,7 @@ def test_issues_no_warning_if_interrupt_enabled_when_pin_is_in_custom_read_mode(
         pin.bank.read_mode = custom_read_mode
         
         with catch_warnings(record=True) as warnings:
-            issue_warnings("always")
+            issue_warnings(u"always")
             
             pin.enable_interrupts()
             
@@ -385,7 +387,7 @@ def test_in_deferred_write_mode_a_reset_discards_outstanding_writes(b, p):
 
 
 class FakeRegisters(Registers):
-    """Note - does not simulate effect of the IPOL{A,B} registers."""
+    u"""Note - does not simulate effect of the IPOL{A,B} registers."""
     
     def __init__(self):
         self.registers = [0]*(BANK_SIZE*2)
@@ -433,18 +435,18 @@ class FakeRegisters(Registers):
         self.registers[_banked_register(bank,reg)] = value
     
     def print_registers(self):
-        for reg, value in zip(count(), self.registers):
-            print(register_names[reg].ljust(8) + " = " + "%02X"%value)
+        for reg, value in izip(count(), self.registers):
+            print register_names[reg].ljust(8) + u" = " + u"%02X"%value
     
     def print_writes(self):
         for reg, value in self.writes:
-            print(register_names[reg].ljust(8) + " := " + "%02X"%value)
+            print register_names[reg].ljust(8) + u" := " + u"%02X"%value
 
     def clear_writes(self):
         self.writes = []
         
     def __repr__(self):
-        return type(self).__name__ + "()"
+        return type(self).__name__ + u"()"
     
     def __str__(self):
         return repr(self)

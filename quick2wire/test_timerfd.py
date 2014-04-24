@@ -1,4 +1,5 @@
 
+from __future__ import with_statement
 from time import time, sleep
 from quick2wire.timerfd import Timer, timespec, itimerspec
 import pytest
@@ -102,7 +103,7 @@ def test_timer_cannot_be_started_if_offset_and_interval_are_both_zero():
     with Timer() as timer:
         try:
             timer.start()
-            assert False, "should have thrown ValueError"
+            assert False, u"should have thrown ValueError"
         except ValueError:
             # expected
             pass

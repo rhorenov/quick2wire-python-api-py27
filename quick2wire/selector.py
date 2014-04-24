@@ -1,4 +1,4 @@
-"""Event notification for I/O, timers, inter-thread and inter-process
+u"""Event notification for I/O, timers, inter-thread and inter-process
 communication.
 """
 
@@ -18,10 +18,10 @@ EDGE = 1
 
 
 class Selector(SelfClosing):
-    """Lets a thread wait for multiple events and handle them one at a time."""
+    u"""Lets a thread wait for multiple events and handle them one at a time."""
     
     def __init__(self, size_hint=-1):
-        """Initialises a Selector.
+        u"""Initialises a Selector.
         
         Arguments:
         size_hint -- A hint of the number of event sources that will
@@ -42,11 +42,11 @@ class Selector(SelfClosing):
         return self._epoll
 
     def fileno(self):
-        """Returns the Selector's file descriptor."""
+        u"""Returns the Selector's file descriptor."""
         return self._get_epoll().fileno()
     
     def add(self, source, eventmask=INPUT|ERROR, trigger=None, identifier=None):
-        """Adds an event source to the Selector.
+        u"""Adds an event source to the Selector.
         
         Arguments:
         source     -- the event source to add.  Must provide a fileno() 
@@ -71,13 +71,13 @@ class Selector(SelfClosing):
                       source itself.
         """
         fileno = source.fileno()
-        trigger = trigger if trigger is not None else getattr(source, "__trigger__", LEVEL)
+        trigger = trigger if trigger is not None else getattr(source, u"__trigger__", LEVEL)
         
         self._sources[fileno] = identifier if identifier is not None else source
         self._get_epoll().register(fileno, eventmask|(select.EPOLLET*trigger))
     
     def remove(self, source):
-        """Removes an event source from the Selector.
+        u"""Removes an event source from the Selector.
         
         Arguments:
         source -- the event source to remove.
@@ -87,7 +87,7 @@ class Selector(SelfClosing):
         del self._sources[fileno]
 
     def wait(self, timeout=-1):
-        """Wait for an event to occur on any of the sources that have been added to the Selector.
+        u"""Wait for an event to occur on any of the sources that have been added to the Selector.
         
         After wait returns, the `ready` property is set to the
         identifier of a source that has an event that needs to be
@@ -115,32 +115,32 @@ class Selector(SelfClosing):
             
     @property
     def has_input(self):
-        """Returns whether the ready event source has input that can be read."""
+        u"""Returns whether the ready event source has input that can be read."""
         return bool(self.events & INPUT)
     
     @property
     def has_output(self):
-        """Returns whether output can be written to the ready event source."""
+        u"""Returns whether output can be written to the ready event source."""
         return bool(self.events & OUTPUT)
     
     @property
     def has_error(self):
-        """Returns whetheran error has occurred on the ready event source."""
+        u"""Returns whetheran error has occurred on the ready event source."""
         return bool(self.events & ERROR)
     
     @property
     def has_hangup(self):
-        """Returns whether a remote hangup has occured on the ready event source."""
+        u"""Returns whether a remote hangup has occured on the ready event source."""
         return bool(self.events & HANGUP)
     
     @property
     def has_priority_input(self):
-        """Returns whether urgent out-of-band data is waiting to be read from the ready event source."""
+        u"""Returns whether urgent out-of-band data is waiting to be read from the ready event source."""
         return bool(self.events & PRIORITY_INPUT)
     
     def close(self):
-        """Closes the Selector and releases its file descriptor."""
+        u"""Closes the Selector and releases its file descriptor."""
         if self._epoll is not None:
             self._epoll.close()
 
-__all__ = ['Selector', 'Timer', 'Semaphore', 'INPUT', 'OUTPUT', 'ERROR', 'HANGUP', 'PRIORITY_INPUT', 'LEVEL', 'EDGE']
+__all__ = [u'Selector', u'Timer', u'Semaphore', u'INPUT', u'OUTPUT', u'ERROR', u'HANGUP', u'PRIORITY_INPUT', u'LEVEL', u'EDGE']

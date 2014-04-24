@@ -1,4 +1,4 @@
-"""
+u"""
 This is a loopback test which uses the MCP23S17 to test the quick2wire.spi.SPIDevice class.
 
 # For the loopback test, each pin on PORTA is connected to the PORTB pin opposite. Thus,
@@ -12,8 +12,10 @@ Note: this test does *not* depend on the quick2wire.mcp23s17 module, so that it 
 released independently
 """
 
+from __future__ import with_statement
 from quick2wire.spi import *
 import pytest
+from itertools import izip
 
 # MCP23S17 registers using bank=0
 IODIRA=0x00
@@ -25,9 +27,9 @@ MCP23S17_BASE_ADDRESS = 0x40
 ALL_OUTPUTS = 0x00
 ALL_INPUTS = 0xFF
 
-bits_out = [(1 << i) for i in range(0,8)]
-bits_in = [(1 << (7 - i)) for i in range(0, 8)]
-bits = zip(bits_out, bits_in)
+bits_out = [(1 << i) for i in xrange(0,8)]
+bits_in = [(1 << (7 - i)) for i in xrange(0, 8)]
+bits = izip(bits_out, bits_in)
 
 address = MCP23S17_BASE_ADDRESS
 

@@ -7,21 +7,21 @@ import errno
 # From sys/eventfd.h
 
 EFD_SEMAPHORE = 1
-EFD_CLOEXEC = 0o2000000
-EFD_NONBLOCK = 0o4000
+EFD_CLOEXEC = 02000000
+EFD_NONBLOCK = 04000
 
 _libc = CDLL(None, use_errno=True)
 
 eventfd_t = c_uint64
 
-eventfd = syscall.lookup(c_int, "eventfd", (c_uint, c_int))
+eventfd = syscall.lookup(c_int, u"eventfd", (c_uint, c_int))
 
 
 class Semaphore(syscall.SelfClosing):
-    """A Semaphore implemented with eventfd that can be added to a Selector."""
+    u"""A Semaphore implemented with eventfd that can be added to a Selector."""
     
     def __init__(self, count=0, blocking=True):
-        """Creates a Semaphore with an initial count.
+        u"""Creates a Semaphore with an initial count.
         
         Arguments:
         count -- the initial count.
@@ -33,19 +33,19 @@ class Semaphore(syscall.SelfClosing):
         self._fd = None
     
     def close(self):
-        """Closes the Semaphore and releases its file descriptor."""
+        u"""Closes the Semaphore and releases its file descriptor."""
         if self._fd is not None:
             os.close(self._fd)
             self._fd = None
     
     def fileno(self):
-        """Returns the Semaphore's file descriptor."""
+        u"""Returns the Semaphore's file descriptor."""
         if self._fd is None:
             self._fd = eventfd(self._initial_count, self._flags)
         return self._fd
     
     def signal(self):
-        """Signal the semaphore.
+        u"""Signal the semaphore.
         
         Signalling a semaphore increments its count by one and wakes a
         blocked task that is waiting on the semaphore.
@@ -53,7 +53,7 @@ class Semaphore(syscall.SelfClosing):
         return os.write(self.fileno(), eventfd_t(1))
     
     def wait(self):
-        """Receive a signal from the Semaphore, decrementing its count by one.
+        u"""Receive a signal from the Semaphore, decrementing its count by one.
         
         If the Semaphore is already has a count of zero, either wait
         for a signal if the Semaphore is in blocking mode, or return
@@ -67,7 +67,7 @@ class Semaphore(syscall.SelfClosing):
         try:
             os.read(self.fileno(), 8)
             return True
-        except OSError as e:
+        except OSError, e:
             if e.errno == errno.EAGAIN:
                 return False
             else:

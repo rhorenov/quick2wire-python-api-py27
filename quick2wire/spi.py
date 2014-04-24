@@ -6,11 +6,11 @@ from fcntl import ioctl
 from quick2wire.spi_ctypes import *
 from quick2wire.spi_ctypes import spi_ioc_transfer, SPI_IOC_MESSAGE
 
-assert sys.version_info.major >= 3, __name__ + " is only supported on Python 3"
+# assert sys.version_info.major >= 3, __name__ + " is only supported on Python 3"
 
 
-class SPIDevice:
-    """Communicates with a hardware device over an SPI bus.
+class SPIDevice(object):
+    u"""Communicates with a hardware device over an SPI bus.
     
     Transactions are performed by passing one or more SPI I/O requests
     to the transaction method of the SPIDevice.  SPI I/O requests are
@@ -32,7 +32,7 @@ class SPIDevice:
     """
     
     def __init__(self, chip_select, bus=0):
-        """Opens the SPI device.
+        u"""Opens the SPI device.
         
         Arguments:
         chip_select -- the SPI chip select line to use. The Raspberry Pi
@@ -40,10 +40,10 @@ class SPIDevice:
         bus         -- the number of the bus (default 0, the only SPI bus
                        on the Raspberry Pi).
         """
-        self.fd = posix.open("/dev/spidev%i.%i"%(bus,chip_select), posix.O_RDWR)
+        self.fd = posix.open(u"/dev/spidev%i.%i"%(bus,chip_select), posix.O_RDWR)
 
     def transaction(self, *transfers):
-        """
+        u"""
         Perform an SPI I/O transaction.
         
         Arguments:
@@ -66,42 +66,42 @@ class SPIDevice:
         return [transfer.to_read_bytes() for t in transfers if t.has_read_buf]
 
     def close(self):
-        """
+        u"""
         Closes the file descriptor.
         """
         posix.close(self.fd)
 
     @property
     def clock_mode(self):
-        """
+        u"""
         Returns the current clock mode for the SPI bus
         """
-        return ord(struct.unpack('c', ioctl(self.fd, SPI_IOC_RD_MODE, " "))[0])
+        return ord(struct.unpack(u'c', ioctl(self.fd, SPI_IOC_RD_MODE, u" "))[0])
 
     @clock_mode.setter
     def clock_mode(self,mode):
-        """
+        u"""
         Changes the clock mode for this SPI bus
 
         For example:
              #start clock low, sample trailing edge
              spi.clock_mode = SPI_MODE_1
         """
-        ioctl(self.fd, SPI_IOC_WR_MODE, struct.pack('I', mode))
+        ioctl(self.fd, SPI_IOC_WR_MODE, struct.pack(u'I', mode))
 
     @property
     def speed_hz(self):
-        """
+        u"""
         Returns the current speed in Hz for this SPI bus
         """
-        return struct.unpack('I', ioctl(self.fd, SPI_IOC_RD_MAX_SPEED_HZ, "    "))[0]
+        return struct.unpack(u'I', ioctl(self.fd, SPI_IOC_RD_MAX_SPEED_HZ, u"    "))[0]
 
     @speed_hz.setter
     def speed_hz(self,speedHz):
-        """
+        u"""
         Changes the speed in Hz for this SPI bus
         """
-        ioctl(self.fd, SPI_IOC_WR_MAX_SPEED_HZ, struct.pack('I', speedHz))
+        ioctl(self.fd, SPI_IOC_WR_MAX_SPEED_HZ, struct.pack(u'I', speedHz))
 
     def __enter__(self):
         return self
@@ -110,10 +110,10 @@ class SPIDevice:
         self.close()
 
 
-class _SPITransfer:
+class _SPITransfer(object):
     def __init__(self, write_byte_seq = None, read_byte_count = None):
         if write_byte_seq is not None:
-            self.write_bytes = bytes(write_byte_seq)
+            self.write_bytes = str(write_byte_seq)
             self.write_buf = create_string_buffer(self.write_bytes, len(self.write_bytes))
         else:
             self.write_bytes = None
@@ -151,32 +151,32 @@ def _safe_address_of(buf):
     return 0 if buf is None else addressof(buf)
 
 def duplex(write_byte_sequence):
-    """An SPI transfer that writes the write_byte_sequence to the device and reads len(write_byte_sequence) bytes from the device.
+    u"""An SPI transfer that writes the write_byte_sequence to the device and reads len(write_byte_sequence) bytes from the device.
     
     The bytes to be written are passed to this function as a sequence.
     """
     return _SPITransfer(write_byte_seq=write_byte_sequence, read_byte_count=len(write_byte_sequence))
 
 def duplex_bytes(*write_bytes):
-    """An SPI transfer that writes the write_bytes to the device and reads len(write_bytes) bytes from the device.
+    u"""An SPI transfer that writes the write_bytes to the device and reads len(write_bytes) bytes from the device.
     
     Each byte to be written is passed as an argument to this function.
     """
     return duplex(write_bytes)
 
 def reading(byte_count):
-    """An SPI transfer that shifts out byte_count zero bytes and reads byte_counts bytes from the device."""
+    u"""An SPI transfer that shifts out byte_count zero bytes and reads byte_counts bytes from the device."""
     return _SPITransfer(read_byte_count=byte_count)
 
 def writing(byte_sequence):
-    """An SPI transfer that writes one or more bytes of data and ignores any bytes read from the device.
+    u"""An SPI transfer that writes one or more bytes of data and ignores any bytes read from the device.
     
     The bytes are passed to this function as a sequence.
     """
     return _SPITransfer(write_byte_seq=byte_sequence)
 
 def writing_bytes(*byte_values):
-    """An SPI transfer that writes one or more bytes of data and ignores any bytes read from the device.
+    u"""An SPI transfer that writes one or more bytes of data and ignores any bytes read from the device.
     
     Each byte is passed as an argument to this function.
     """

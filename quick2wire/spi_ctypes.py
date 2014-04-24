@@ -63,17 +63,17 @@ SPI_IOC_MAGIC = 107 # ord('k')
 # last transfer might write some register values.
 
 class spi_ioc_transfer(Structure):
-    """<linux/spi/spidev.h> struct spi_ioc_transfer"""
+    u"""<linux/spi/spidev.h> struct spi_ioc_transfer"""
     
     _fields_ = [
-        ("tx_buf", c_uint64),
-        ("rx_buf", c_uint64),
-        ("len", c_uint32),
-        ("speed_hz", c_uint32),
-        ("delay_usecs", c_uint16),
-        ("bits_per_word", c_uint8),
-        ("cs_change", c_uint8),
-        ("pad", c_uint32)]
+        (u"tx_buf", c_uint64),
+        (u"rx_buf", c_uint64),
+        (u"len", c_uint32),
+        (u"speed_hz", c_uint32),
+        (u"delay_usecs", c_uint16),
+        (u"bits_per_word", c_uint8),
+        (u"cs_change", c_uint8),
+        (u"pad", c_uint32)]
     
     __slots__ = [name for name,type in _fields_]
 

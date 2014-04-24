@@ -1,5 +1,6 @@
 
 
+from __future__ import division
 import math
 import os
 from ctypes import *
@@ -15,8 +16,8 @@ time_t = c_long
 clockid_t = c_ulong
 
 class timespec(Structure):
-    _fields_ = [("sec", time_t),
-                ("nsec", c_long)]
+    _fields_ = [(u"sec", time_t),
+                (u"nsec", c_long)]
     
     __slots__ = [name for name,type in _fields_]
     
@@ -41,8 +42,8 @@ class timespec(Structure):
 
 
 class itimerspec(Structure):
-    _fields_ = [("interval", timespec), 
-                ("value", timespec)]
+    _fields_ = [(u"interval", timespec), 
+                (u"value", timespec)]
     
     __slots__ = [name for name,type in _fields_]
     
@@ -71,8 +72,8 @@ CLOCK_BOOTTIME_ALARM     = 9 # Like CLOCK_BOOTTIME but also wakes suspended syst
 # From <sys/timerfd.h>
 
 # Bits to be set in the FLAGS parameter of `timerfd_create'.
-TFD_CLOEXEC = 0o2000000,
-TFD_NONBLOCK = 0o4000
+TFD_CLOEXEC = 02000000,
+TFD_NONBLOCK = 04000
 
 # Bits to be set in the FLAGS parameter of `timerfd_settime'.
 TFD_TIMER_ABSTIME = 1 << 0
@@ -83,7 +84,7 @@ TFD_TIMER_ABSTIME = 1 << 0
 #
 # extern int timerfd_create (clockid_t __clock_id, int __flags)
 
-timerfd_create = syscall.lookup(c_int, "timerfd_create", (clockid_t, c_int))
+timerfd_create = syscall.lookup(c_int, u"timerfd_create", (clockid_t, c_int))
 
 # Set next expiration time of interval timer source UFD to UTMR.  If
 # FLAGS has the TFD_TIMER_ABSTIME flag set the timeout value is
@@ -92,20 +93,20 @@ timerfd_create = syscall.lookup(c_int, "timerfd_create", (clockid_t, c_int))
 # extern int timerfd_settime (int __ufd, int __flags,
 # 			      __const struct itimerspec *__utmr,
 # 			      struct itimerspec *__otmr)
-timerfd_settime = syscall.lookup(c_int, "timerfd_settime", (c_int, c_int, POINTER(itimerspec), POINTER(itimerspec)))
+timerfd_settime = syscall.lookup(c_int, u"timerfd_settime", (c_int, c_int, POINTER(itimerspec), POINTER(itimerspec)))
 
 # Return the next expiration time of UFD.
 #
 # extern int timerfd_gettime (int __ufd, struct itimerspec *__otmr)
 
-timerfd_gettime = syscall.lookup(c_int, "timerfd_gettime", (c_int, POINTER(itimerspec)))
+timerfd_gettime = syscall.lookup(c_int, u"timerfd_gettime", (c_int, POINTER(itimerspec)))
 
 
 class Timer(syscall.SelfClosing):
-    """A one-shot or repeating timer that can be added to a Selector."""
+    u"""A one-shot or repeating timer that can be added to a Selector."""
     
     def __init__(self, offset=0, interval=0, blocking=True, clock=CLOCK_REALTIME):
-        """Creates a new Timer.
+        u"""Creates a new Timer.
         
         Arguments:
         offset   -- the initial expiration time, measured in seconds from
@@ -127,20 +128,20 @@ class Timer(syscall.SelfClosing):
         self._started = False
     
     def close(self):
-        """Closes the Timer and releases its file descriptor."""
+        u"""Closes the Timer and releases its file descriptor."""
         if self._fd is not None:
             os.close(self._fd)
             self._fd = None
         
     def fileno(self):
-        """Returns the Timer's file descriptor."""
+        u"""Returns the Timer's file descriptor."""
         if self._fd is None:
             self._fd = timerfd_create(self._clock, self._flags)
         return self._fd
 
     @property
     def offset(self):
-        """the initial expiration time, measured in seconds from the call to start()."""
+        u"""the initial expiration time, measured in seconds from the call to start()."""
         return self._offset
     
     @offset.setter
@@ -151,7 +152,7 @@ class Timer(syscall.SelfClosing):
     
     @property
     def interval(self):
-        """The interval, specified in seconds, with which the timer will repeat.
+        u"""The interval, specified in seconds, with which the timer will repeat.
         
         If zero, the timer only fires once, when the offset expires.
         """
@@ -164,24 +165,24 @@ class Timer(syscall.SelfClosing):
             self._apply_schedule()
     
     def start(self):
-        """Starts the timer running.
+        u"""Starts the timer running.
         
         Raises:
         ValueError -- if offset and interval are both zero.
         """
         if self._offset == 0 and self._interval == 0:
-            raise ValueError("timer will not fire because offset and interval are both zero")
+            raise ValueError(u"timer will not fire because offset and interval are both zero")
         
         self._apply_schedule()
         self._started = True
         
     def stop(self):
-        """Stops the timer running. Any scheduled timer events will not fire."""
+        u"""Stops the timer running. Any scheduled timer events will not fire."""
         self._schedule(0, 0)
         self._started = False
     
     def wait(self):
-        """Receives timer events.
+        u"""Receives timer events.
         
         If the timer has already expired one or more times since its
         settings were last modified or wait() was last called then
@@ -197,8 +198,8 @@ class Timer(syscall.SelfClosing):
         """
         try:
             buf = os.read(self.fileno(), 8)
-            return struct.unpack("Q", buf)[0]
-        except OSError as e:
+            return struct.unpack(u"Q", buf)[0]
+        except OSError, e:
             if e.errno == errno.EAGAIN:
                 return 0
             else:

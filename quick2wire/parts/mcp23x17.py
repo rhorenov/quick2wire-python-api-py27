@@ -1,4 +1,4 @@
-"""
+u"""
 Low-level register access and a high-level application-programming
 interface for the MCP23x17 series of GPIO expanders.
 
@@ -12,8 +12,8 @@ from warnings import warn
 from quick2wire.gpio import PinAPI, PinBankAPI
 
 # TODO - import from GPIO or common definitions module
-In = "in"
-Out = "out"
+In = u"in"
+Out = u"out"
 
 # Bits within the IOCON regiseter
 IOCON_INTPOL=1
@@ -69,7 +69,7 @@ GPIOB = _banked_register(_BankB, GPIO)
 OLATA = _banked_register(_BankA, OLAT)
 OLATB = _banked_register(_BankB, OLAT)
 
-register_names = sorted([s for s in globals().keys() if s[-1] in ('A','B') and s.upper() == s], 
+register_names = sorted([s for s in globals().keys() if s[-1] in (u'A',u'B') and s.upper() == s], 
                         key=lambda s: globals()[s])
 
 _initial_register_values = (
@@ -81,7 +81,7 @@ def _reset_sequence():
 
 
 class Registers(object):
-    """Abstract interface for reading/writing MCP23x17 registers over the I2C or SPI bus.
+    u"""Abstract interface for reading/writing MCP23x17 registers over the I2C or SPI bus.
     
     You shouldn't normally need to use this class.
 
@@ -91,7 +91,7 @@ class Registers(object):
     """
     
     def reset(self, iocon=0x00):
-        """Reset to power-on state
+        u"""Reset to power-on state
         """
         self.write_register(IOCON_BOTH, iocon)
         
@@ -100,17 +100,17 @@ class Registers(object):
             self.write_banked_register(_BankB, reg, value)
     
     def write_banked_register(self, bank, reg, value):
-        """Write the value of a register within a bank.
+        u"""Write the value of a register within a bank.
         """
         self.write_register(_banked_register(bank, reg), value)
         
     def read_banked_register(self, bank, reg):
-        """Read the value of a register within a bank.
+        u"""Read the value of a register within a bank.
         """
         return self.read_register(_banked_register(bank, reg))
     
     def write_register(self, reg, value):
-        """Write the value of a register.
+        u"""Write the value of a register.
         
         Implement in subclasses.
         
@@ -121,7 +121,7 @@ class Registers(object):
         pass
     
     def read_register(self, reg):
-        """Read the value of a register.
+        u"""Read the value of a register.
         
         Implement in subclasses.
         
@@ -140,24 +140,24 @@ def _set_bit(current_value, bit_index, new_value):
 
 
 class PinBanks(object):
-    """The pin banks of an MCP23x17 chip."""
+    u"""The pin banks of an MCP23x17 chip."""
     
     def __init__(self, registers):
         self.registers = registers
         self._banks = (PinBank(self, 0), PinBank(self, 1))
     
     def __len__(self):
-        """Returns the number of pin banks. (2 for the MCP23x17)"""
+        u"""Returns the number of pin banks. (2 for the MCP23x17)"""
         return len(self._banks)
     
     def bank(self, n):
-        """Returns bank n."""
+        u"""Returns bank n."""
         return self._banks[n]
     
     __getitem__ = bank
     
     def reset(self, interrupt_polarity=0, interrupt_open_drain=False, interrupt_mirror=True):
-        """Resets the chip to power-on state and sets configuration flags in the IOCON register
+        u"""Resets the chip to power-on state and sets configuration flags in the IOCON register
         
         Parameters:
         interrupt_polarity   -- sets the polarity of the interrupt output 
@@ -191,11 +191,11 @@ class PinBanks(object):
 # Read and write modes
 
 def deferred_read(f):
-    """A PinBank read mode: read() must be called explicitly."""
+    u"""A PinBank read mode: read() must be called explicitly."""
     pass
 
 def immediate_read(f):
-    """A PinBank read mode: read() is called automatically whenever a pin value is read.
+    u"""A PinBank read mode: read() is called automatically whenever a pin value is read.
     
     Note: this mode is not compatible with interrupts. A warning will
     be issued if interrupts are enabled on a PinBank that is in
@@ -204,21 +204,21 @@ def immediate_read(f):
     f()
 
 def deferred_write(f):
-    """A PinBank write mode: write() must be called explicitly."""
+    u"""A PinBank write mode: write() must be called explicitly."""
     pass
 
 def immediate_write(f):
-    """A PinBank write mode: registers are written whenever Pin attributes are set."""
+    u"""A PinBank write mode: registers are written whenever Pin attributes are set."""
     f()
 
 
 class PinBank(PinBankAPI):
-    """A bank of 8 GPIO pins"""
+    u"""A bank of 8 GPIO pins"""
     
     def __init__(self, chip, bank_id):
         self.chip = chip
         self._bank_id = bank_id
-        self._pins = tuple([Pin(self, i) for i in range(8)])
+        self._pins = tuple([Pin(self, i) for i in xrange(8)])
         self._register_cache = [None]*BANK_SIZE # self._register_cache[IOCON] is ignored
         self._outstanding_writes = []
         self.read_mode = immediate_read
@@ -227,17 +227,17 @@ class PinBank(PinBankAPI):
     
     @property
     def index(self):
-        """The index of this bank (0 or 1)."""
+        u"""The index of this bank (0 or 1)."""
         return self._bank_id
     
 
     def __len__(self):
-        """The number of pins in the bank. (8 for the MCP23x17)"""
+        u"""The number of pins in the bank. (8 for the MCP23x17)"""
         return len(self._pins)
     
     
     def pin(self, n):
-        """Returns pin n."""
+        u"""Returns pin n."""
         pin = self._pins[n]
         return pin
     
@@ -245,7 +245,7 @@ class PinBank(PinBankAPI):
     
 
     def read(self):
-        """Read the GPIO input and interrupt capture registers from the chip.
+        u"""Read the GPIO input and interrupt capture registers from the chip.
         
         If the bank's read_mode is set to deferred_read, this must be
         called to make value property of the bank's Pins reflect the
@@ -260,7 +260,7 @@ class PinBank(PinBankAPI):
     
 
     def write(self):
-        """Write changes to the pin's state capture and GPIO input registers from the chip.
+        u"""Write changes to the pin's state capture and GPIO input registers from the chip.
         
         If the bank's write_mode is set to deferred_write, this must be
         update the chip's physical input pins so that they reflect the
@@ -308,11 +308,11 @@ class PinBank(PinBankAPI):
     
     def _check_read_mode_for_interrupts(self):
         if self.read_mode == immediate_read:
-            warn("interrupts enabled when in immediate read mode", stacklevel=1)
+            warn(u"interrupts enabled when in immediate read mode", stacklevel=1)
     
     
     def __str__(self):
-        return "PinBank("+self.index+")"
+        return u"PinBank("+self.index+u")"
     
 
 def _register_bit(register, doc, high_value=True, low_value=False):
@@ -325,53 +325,53 @@ def _register_bit(register, doc, high_value=True, low_value=False):
     return property(_read, _write, doc=doc)
 
 class Pin(PinAPI):
-    """A digital Pin that can be used for input or output."""
+    u"""A digital Pin that can be used for input or output."""
     
     def __init__(self, bank, index):
-        """Called by the PinBank.  Not used by application code."""
+        u"""Called by the PinBank.  Not used by application code."""
         super(Pin,self).__init__(bank,index)
         self._is_claimed = False
     
     def open(self):
-        """Acquire the Pin for use.
+        u"""Acquire the Pin for use.
         
         Raises: ValueError if the pin is already in use.
         """
         if self._is_claimed:
-            raise ValueError("pin already in use")
+            raise ValueError(u"pin already in use")
         self._is_claimed = True
     
     def close(self):
         self._is_claimed = False
     
     def get(self):
-        """Returns the value of the pin.  
+        u"""Returns the value of the pin.  
         
         The same as pin.value, but a method so that it can easily be passed around as a function.
         """
         return self._get_register_bit(GPIO)
     
     def set(self, new_value):
-        """Sets the value of the pin.  
+        u"""Sets the value of the pin.  
         
         The same as pin.value, but a method so that it can easily be passed around as a function.
         """
         self._set_register_bit(OLAT, new_value)
     
     direction = _register_bit(IODIR, high_value=In, low_value=Out,
-                              doc="""The direction of the pin: In if the pin is used for input, Out if it is used for output.""")
+                              doc=u"""The direction of the pin: In if the pin is used for input, Out if it is used for output.""")
     
     inverted = _register_bit(IPOL, 
-        """Controls the polarity of the pin. If True, the value property will return the inverted signal on the hardware pin.""")
+        u"""Controls the polarity of the pin. If True, the value property will return the inverted signal on the hardware pin.""")
     
     pull_up = _register_bit(GPPU,
-        """Is the pull up resistor enabled for the pin?
+        u"""Is the pull up resistor enabled for the pin?
         True:  the pull up resistor is enabled
         False: the pull up resistor is not enabled
         """)
     
     def enable_interrupts(self, value=None):
-        """Signal an interrupt on the bank's interrupt line whenever the value of the pin changes.
+        u"""Signal an interrupt on the bank's interrupt line whenever the value of the pin changes.
         
         Parameters:
         value -- If set, the interrupt is signalled when the pin's value is changed to this value.
@@ -387,12 +387,12 @@ class Pin(PinAPI):
         self._set_register_bit(GPINTEN, 1)
     
     def disable_interrupts(self):
-        """Do not signal an interrupt when the value of the pin changes."""
+        u"""Do not signal an interrupt when the value of the pin changes."""
         self._set_register_bit(GPINTEN, 0)
     
     @property
     def interrupt(self):
-        """Has the pin signalled an interrupt that has not been services?
+        u"""Has the pin signalled an interrupt that has not been services?
         
         True:  the pin has signalled an interrupt
         False: the pin has not signalled an interrupt
@@ -406,5 +406,5 @@ class Pin(PinAPI):
         return self.bank._get_register_bit(register, self.index)
         
     def __repr__(self):
-        return "Pin(banks["+ str(self.bank.index) + "], " + str(self.index) + ")"
+        return u"Pin(banks["+ unicode(self.bank.index) + u"], " + unicode(self.index) + u")"
 

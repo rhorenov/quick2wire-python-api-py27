@@ -7,13 +7,13 @@ from ctypes import c_int, c_uint16, c_ushort, c_short, c_ubyte, c_char, POINTER,
 
 # /usr/include/linux/i2c-dev.h: 38
 class i2c_msg(Structure):
-    """<linux/i2c-dev.h> struct i2c_msg"""
+    u"""<linux/i2c-dev.h> struct i2c_msg"""
     
     _fields_ = [
-        ('addr', c_uint16),
-        ('flags', c_ushort),
-        ('len', c_short),
-        ('buf', POINTER(c_char))]
+        (u'addr', c_uint16),
+        (u'flags', c_ushort),
+        (u'len', c_short),
+        (u'buf', POINTER(c_char))]
     
     __slots__ = [name for name,type in _fields_]
 
@@ -31,10 +31,10 @@ I2C_M_RECV_LEN		= 0x0400	# length will be first received byte
 
 # /usr/include/linux/i2c-dev.h: 155
 class i2c_rdwr_ioctl_data(Structure):
-    """<linux/i2c-dev.h> struct i2c_rdwr_ioctl_data"""
+    u"""<linux/i2c-dev.h> struct i2c_rdwr_ioctl_data"""
     _fields_ = [
-        ('msgs', POINTER(i2c_msg)),
-        ('nmsgs', c_int)]
+        (u'msgs', POINTER(i2c_msg)),
+        (u'nmsgs', c_int)]
 
     __slots__ = [name for name,type in _fields_]
 

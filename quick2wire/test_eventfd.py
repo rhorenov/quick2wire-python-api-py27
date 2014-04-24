@@ -1,4 +1,5 @@
 
+from __future__ import with_statement
 from select import epoll, EPOLLIN
 from contextlib import closing
 from quick2wire.eventfd import Semaphore

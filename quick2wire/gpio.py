@@ -1,30 +1,32 @@
-"""A convenient API to access the GPIO pins of the Raspberry Pi.
+u"""A convenient API to access the GPIO pins of the Raspberry Pi.
 
 """
 
+from __future__ import with_statement
 import os
 import subprocess
 from contextlib import contextmanager
 from quick2wire.board_revision import revision
 from quick2wire.selector import EDGE
+from io import open
 
 
 def gpio_admin(subcommand, pin, pull=None):
     if pull:
-        subprocess.check_call(["gpio-admin", subcommand, str(pin), pull])
+        subprocess.check_call([u"gpio-admin", subcommand, unicode(pin), pull])
     else:
-        subprocess.check_call(["gpio-admin", subcommand, str(pin)])
+        subprocess.check_call([u"gpio-admin", subcommand, unicode(pin)])
 
 
-Out = "out"
-In = "in"
+Out = u"out"
+In = u"in"
     
-Rising = "rising"
-Falling = "falling"
-Both = "both"
+Rising = u"rising"
+Falling = u"falling"
+Both = u"both"
     
-PullDown = "pulldown"
-PullUp = "pullup"
+PullDown = u"pulldown"
+PullUp = u"pullup"
 
 
 
@@ -50,13 +52,13 @@ class PinAPI(object):
     
     value = property(lambda p: p.get(), 
                      lambda p,v: p.set(v), 
-                     doc="""The value of the pin: 1 if the pin is high, 0 if the pin is low.""")
+                     doc=u"""The value of the pin: 1 if the pin is high, 0 if the pin is low.""")
     
 
 class PinBankAPI(object):
     def __getitem__(self, n):
         if 0 < n < len(self):
-            raise ValueError("no pin index {n} out of range", n=n)
+            raise ValueError(u"no pin index {n} out of range", n=n)
         return self.pin(n)
     
     def write(self):
@@ -68,12 +70,12 @@ class PinBankAPI(object):
 
 
 class Pin(PinAPI):
-    """Controls a GPIO pin."""
+    u"""Controls a GPIO pin."""
     
     __trigger__ = EDGE
     
     def __init__(self, bank, index, soc_pin_number, direction=In, interrupt=None, pull=None):
-        """Creates a pin
+        u"""Creates a pin
         
         Parameters:
         user_pin_number -- the identity of the pin used to create the derived class.
@@ -98,11 +100,11 @@ class Pin(PinAPI):
         return self._soc_pin_number
     
     def open(self):
-        gpio_admin("export", self.soc_pin_number, self._pull)
-        self._file = open(self._pin_path("value"), "r+")
-        self._write("direction", self._direction)
+        gpio_admin(u"export", self.soc_pin_number, self._pull)
+        self._file = open(self._pin_path(u"value"), u"r+")
+        self._write(u"direction", self._direction)
         if self._direction == In:
-            self._write("edge", self._interrupt if self._interrupt is not None else "none")
+            self._write(u"edge", self._interrupt if self._interrupt is not None else u"none")
             
     def close(self):
         if not self.closed:
@@ -110,12 +112,12 @@ class Pin(PinAPI):
                 self.value = 0
             self._file.close()
             self._file = None
-            self._write("direction", In)
-            self._write("edge", "none")
-            gpio_admin("unexport", self.soc_pin_number)
+            self._write(u"direction", In)
+            self._write(u"edge", u"none")
+            gpio_admin(u"unexport", self.soc_pin_number)
     
     def get(self):
-        """The current value of the pin: 1 if the pin is high or 0 if the pin is low.
+        u"""The current value of the pin: 1 if the pin is high or 0 if the pin is low.
         
         The value can only be set if the pin's direction is Out.
         
@@ -130,14 +132,14 @@ class Pin(PinAPI):
     def set(self, new_value):
         self._check_open()
         if self._direction != Out:
-            raise ValueError("not an output pin")
+            raise ValueError(u"not an output pin")
         self._file.seek(0)
-        self._file.write(str(int(new_value)))
+        self._file.write(unicode(int(new_value)))
         self._file.flush()
     
     @property
     def direction(self):
-        """The direction of the pin: either In or Out.
+        u"""The direction of the pin: either In or Out.
         
         The value of the pin can only be set if its direction is Out.
         
@@ -148,12 +150,12 @@ class Pin(PinAPI):
     
     @direction.setter
     def direction(self, new_value):
-        self._write("direction", new_value)
+        self._write(u"direction", new_value)
         self._direction = new_value
     
     @property 
     def interrupt(self):
-        """The interrupt property specifies what event (if any) will raise an interrupt.
+        u"""The interrupt property specifies what event (if any) will raise an interrupt.
         
         One of: 
         Rising  -- voltage changing from low to high
@@ -168,7 +170,7 @@ class Pin(PinAPI):
     
     @interrupt.setter
     def interrupt(self, new_value):
-        self._write("edge", new_value)
+        self._write(u"edge", new_value)
         self._interrupt = new_value
 
     @property
@@ -176,30 +178,30 @@ class Pin(PinAPI):
         return self._pull
     
     def fileno(self):
-        """Return the underlying file descriptor.  Useful for select, epoll, etc."""
+        u"""Return the underlying file descriptor.  Useful for select, epoll, etc."""
         return self._file.fileno()
     
     @property
     def closed(self):
-        """Returns if this pin is closed"""
+        u"""Returns if this pin is closed"""
         return self._file is None or self._file.closed
     
     def _check_open(self):
         if self.closed:
-            raise IOError(str(self) + " is closed")
+            raise IOError(unicode(self) + u" is closed")
     
     def _write(self, filename, value):
-        with open(self._pin_path(filename), "w+") as f:
+        with open(self._pin_path(filename), u"w+") as f:
             f.write(value)
     
-    def _pin_path(self, filename=""):
-        return "/sys/devices/virtual/gpio/gpio%i/%s" % (self.soc_pin_number, filename)
+    def _pin_path(self, filename=u""):
+        return u"/sys/devices/virtual/gpio/gpio%i/%s" % (self.soc_pin_number, filename)
     
     def __repr__(self):
-        return self.__module__ + "." + str(self)
+        return self.__module__ + u"." + unicode(self)
     
     def __str__(self):
-        return "{type}({index})".format(
+        return u"{type}({index})".format(
             type=self.__class__.__name__, 
             index=self.index)
 
@@ -224,7 +226,7 @@ class PinBank(PinBankAPI):
         if self._count is not None:
             return self._count
         else:
-            raise TypeError(self.__class__.__name__ + " has no len")
+            raise TypeError(self.__class__.__name__ + u" has no len")
 
 
 BUTTON = 0
@@ -284,7 +286,7 @@ else:
         except LookupError:
             pass
         
-        raise IndexError(str(i) + " is not a valid pin index")
+        raise IndexError(unicode(i) + u" is not a valid pin index")
 
     def map_with(pin_mapping):
         return lambda i: lookup(pin_mapping,i)

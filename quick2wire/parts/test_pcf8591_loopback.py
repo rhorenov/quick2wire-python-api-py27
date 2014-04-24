@@ -1,4 +1,4 @@
-"""Loopback tests for the PCF8591 API
+u"""Loopback tests for the PCF8591 API
 
 Topology:
 
@@ -11,6 +11,8 @@ Topology:
 
 """
 
+from __future__ import with_statement
+from __future__ import division
 from time import sleep
 from quick2wire.i2c import I2CMaster
 from quick2wire.parts.pcf8591 import PCF8591, FOUR_SINGLE_ENDED, THREE_DIFFERENTIAL
@@ -37,7 +39,7 @@ def test_pcf8591_loopback_single_ended():
     input = adc.single_ended_input(3)
     
     with adc.output as output:
-        for v in (i/255.0 for i in range(256)):
+        for v in (i/255.0 for i in xrange(256)):
             output.value = v
             assert_is_approx(v, input.value)
 
@@ -49,7 +51,7 @@ def test_pcf8591_loopback_switching_channels():
     p1 = adc.single_ended_input(1)
     p2 = adc.single_ended_input(2)
     
-    for i in range(8):
+    for i in xrange(8):
         assert p1.value == 0.0
         assert p2.value == 1.0
 
@@ -61,7 +63,7 @@ def test_pcf8591_loopback_differential_vref_to_ain3():
     cmp_vref = adc.differential_input(2)
     
     with adc.output as output:
-        for v in (i/255.0 for i in range(256)):
+        for v in (i/255.0 for i in xrange(256)):
             output.value = v
             assert_is_approx(min(0.5, 1-v), cmp_vref.value)
 
@@ -73,6 +75,6 @@ def test_pcf8591_loopback_differential_gnd_to_ain3():
     cmp_gnd = adc.differential_input(1)
     
     with adc.output as output:
-        for v in (i/255.0 for i in range(256)):
+        for v in (i/255.0 for i in xrange(256)):
             output.value = v
             assert_is_approx(max(-0.5, -v), cmp_gnd.value)

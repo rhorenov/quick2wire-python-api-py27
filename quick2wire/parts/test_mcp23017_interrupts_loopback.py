@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from quick2wire.i2c import I2CMaster
 from quick2wire.gpio import pins, In, Out, I2C_INTERRUPT
 from quick2wire.parts.mcp23017 import MCP23017, deferred_read

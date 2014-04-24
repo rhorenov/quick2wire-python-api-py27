@@ -1,11 +1,12 @@
 
+from __future__ import with_statement
 from quick2wire.i2c_ctypes import I2C_M_RD
 from quick2wire.gpio import In
 from quick2wire.parts.pcf8591 import PCF8591, FOUR_SINGLE_ENDED, THREE_DIFFERENTIAL, SINGLE_ENDED_AND_DIFFERENTIAL, TWO_DIFFERENTIAL
 import pytest
 
 
-class FakeI2CMaster:
+class FakeI2CMaster(object):
     def __init__(self):
         self._requests = []
         self._responses = []
@@ -76,8 +77,8 @@ def create_pcf8591(*args, **kwargs):
     return adc
 
 def assert_all_input_pins_report_direction(adc):
-    assert all(adc.single_ended_input(p).direction == In for p in range(adc.single_ended_input_count))
-    assert all(adc.differential_input(p).direction == In for p in range(adc.differential_input_count))
+    assert all(adc.single_ended_input(p).direction == In for p in xrange(adc.single_ended_input_count))
+    assert all(adc.differential_input(p).direction == In for p in xrange(adc.differential_input_count))
 
 
 def test_can_be_created_with_four_single_ended_inputs():
@@ -113,8 +114,8 @@ def test_can_read_a_single_ended_pin():
     
     pin = adc.single_ended_input(2)
     
-    i2c.add_response(bytes([0x80, 0x60]))
-    i2c.add_response(bytes([0x40, 0x40]))
+    i2c.add_response(str([0x80, 0x60]))
+    i2c.add_response(str([0x40, 0x40]))
     
     sample = pin.value
     
@@ -123,7 +124,7 @@ def test_can_read_a_single_ended_pin():
     m1a,m1b = i2c.request(0)
     assert is_write(m1a)
     assert m1a.len == 1
-    assert m1a.buf[0][0] == 0b00000010
+    assert m1a.buf[0][0] == __builtins__.long("00000010", 2)
     
     assert is_read(m1b)
     assert m1b.len == 2
@@ -140,8 +141,8 @@ def test_can_read_raw_value_of_a_single_ended_pin():
     
     pin = adc.single_ended_input(2)
     
-    i2c.add_response(bytes([0x80, 0x60]))
-    i2c.add_response(bytes([0x40, 0x40]))
+    i2c.add_response(str([0x80, 0x60]))
+    i2c.add_response(str([0x40, 0x40]))
     
     sample = pin.raw_value
     
@@ -150,7 +151,7 @@ def test_can_read_raw_value_of_a_single_ended_pin():
     m1a,m1b = i2c.request(0)
     assert is_write(m1a)
     assert m1a.len == 1
-    assert m1a.buf[0][0] == 0b00000010
+    assert m1a.buf[0][0] == __builtins__.long("00000010", 2)
     
     assert is_read(m1b)
     assert m1b.len == 2
@@ -168,10 +169,10 @@ def test_can_read_a_differential_pin():
     pin = adc.differential_input(1)
     
 
-    i2c.add_response(bytes([0x80, 0x60]))
+    i2c.add_response(str([0x80, 0x60]))
     
     # -64 in 8-bit 2's complement representation
-    i2c.add_response(bytes([0xC0, 0xC0]))
+    i2c.add_response(str([0xC0, 0xC0]))
     
     sample = pin.raw_value
     
@@ -180,7 +181,7 @@ def test_can_read_a_differential_pin():
     m1a,m1b = i2c.request(0)
     assert is_write(m1a)
     assert m1a.len == 1
-    assert m1a.buf[0][0] == 0b00010001
+    assert m1a.buf[0][0] == __builtins__.long("00010001", 2)
     
     assert is_read(m1b)
     assert m1b.len == 2
@@ -197,10 +198,10 @@ def test_can_read_raw_value_of_a_differential_pin():
     
     pin = adc.differential_input(1)
     
-    i2c.add_response(bytes([0x80, 0x60]))
+    i2c.add_response(str([0x80, 0x60]))
     
     # -64 in 8-bit 2's complement representation
-    i2c.add_response(bytes([0xC0, 0xC0]))
+    i2c.add_response(str([0xC0, 0xC0]))
     
     sample = pin.value
     
@@ -209,7 +210,7 @@ def test_can_read_raw_value_of_a_differential_pin():
     m1a,m1b = i2c.request(0)
     assert is_write(m1a)
     assert m1a.len == 1
-    assert m1a.buf[0][0] == 0b00010001
+    assert m1a.buf[0][0] == __builtins__.long("00010001", 2)
     
     assert is_read(m1b)
     assert m1b.len == 2
@@ -228,7 +229,7 @@ def test_sends_correct_mode_bits_for_four_single_ended_mode():
     
     pin.get()
     
-    assert i2c.request(0)[0].buf[0][0] == 0b00000001
+    assert i2c.request(0)[0].buf[0][0] == __builtins__.long("00000001", 2)
 
 
 def test_sends_correct_mode_bits_for_four_single_ended_mode():
@@ -238,7 +239,7 @@ def test_sends_correct_mode_bits_for_four_single_ended_mode():
     
     pin.get()
     
-    assert i2c.request(0)[0].buf[0][0] == 0b00000001
+    assert i2c.request(0)[0].buf[0][0] == __builtins__.long("00000001", 2)
 
 
 def test_sends_correct_mode_bits_for_two_differential_mode():
@@ -248,7 +249,7 @@ def test_sends_correct_mode_bits_for_two_differential_mode():
     
     pin.get()
     
-    assert i2c.request(0)[0].buf[0][0] == 0b00110001
+    assert i2c.request(0)[0].buf[0][0] == __builtins__.long("00110001", 2)
 
 
 def test_sends_correct_mode_bits_for_single_ended_and_differential_mode():
@@ -258,7 +259,7 @@ def test_sends_correct_mode_bits_for_single_ended_and_differential_mode():
     
     pin.get()
     
-    assert i2c.request(0)[0].buf[0][0] == 0b00100001
+    assert i2c.request(0)[0].buf[0][0] == __builtins__.long("00100001", 2)
     
 
 def test_does_not_switch_channel_and_only_reads_once_for_subsequent_reads_from_same_pin():
@@ -294,7 +295,7 @@ def test_switches_channel_and_reads_twice_when_reading_from_different_pin():
     ma,mb = i2c.request(3)
     assert is_write(ma)
     assert ma.len == 1
-    assert ma.buf[0][0] == 0b00000001
+    assert ma.buf[0][0] == __builtins__.long("00000001", 2)
     assert is_read(mb)
     assert mb.len == 2
     
@@ -307,14 +308,14 @@ def test_opening_and_closing_the_output_pin_turns_the_digital_to_analogue_conver
     m1, = i2c.request(0)
     assert is_write(m1)
     assert m1.len == 1
-    assert m1.buf[0][0] == 0b01000000
+    assert m1.buf[0][0] == __builtins__.long("01000000", 2)
     
     adc.output.close()
     assert i2c.request_count == 2
     m2, = i2c.request(1)
     assert is_write(m2)
     assert m2.len == 1
-    assert m2.buf[0][0] == 0b00000000
+    assert m2.buf[0][0] == __builtins__.long("00000000", 2)
 
 
 def test_output_pin_opens_and_closes_itself_when_used_as_a_context_manager():
@@ -335,7 +336,7 @@ def test_setting_value_of_output_pin_sends_value_as_second_written_byte():
         assert i2c.request_count == 2
         m1, = i2c.request(1)
         assert m1.len == 2
-        assert m1.buf[0][0] == 0b01000000
+        assert m1.buf[0][0] == __builtins__.long("01000000", 2)
         assert m1.buf[1][0] == 127
 
         pin.value = 0.25
@@ -343,7 +344,7 @@ def test_setting_value_of_output_pin_sends_value_as_second_written_byte():
         assert i2c.request_count == 3
         m2, = i2c.request(2)
         assert m2.len == 2
-        assert m2.buf[0][0] == 0b01000000
+        assert m2.buf[0][0] == __builtins__.long("01000000", 2)
         assert m2.buf[1][0] == 63
 
 
@@ -359,11 +360,11 @@ def test_setting_value_of_output_pin_does_not_affect_currently_selected_input_pi
         
         opin.value = 0.5
         assert i2c.request_count == 4
-        assert i2c.request(3)[0].buf[0][0] == 0b01000001
+        assert i2c.request(3)[0].buf[0][0] == __builtins__.long("01000001", 2)
         
         adc.single_ended_input(2).get()
         assert i2c.request_count == 6
         
         opin.value = 0.5
         assert i2c.request_count == 7
-        assert i2c.request(6)[0].buf[0][0] == 0b01000010
+        assert i2c.request(6)[0].buf[0][0] == __builtins__.long("01000010", 2)

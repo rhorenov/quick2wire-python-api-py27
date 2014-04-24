@@ -1,3 +1,4 @@
+from __future__ import with_statement
 import quick2wire.i2c as i2c
 from quick2wire.parts.mcp23017 import Registers as MCP23017Registers, MCP23017
 from quick2wire.parts.mcp23017 import deferred_read, deferred_write, In, Out
@@ -7,7 +8,7 @@ import pytest
 
 
 # Simplest test - pins of bank 0 connected to corresponding pin of bank 1
-Topology = [((0,i), (1,i)) for i in range(8)]
+Topology = [((0,i), (1,i)) for i in xrange(8)]
 
 def inverse(topology):
     return [(b,a) for (a,b) in topology]

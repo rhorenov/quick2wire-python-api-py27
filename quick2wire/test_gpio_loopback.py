@@ -1,4 +1,4 @@
-"""Loopback tests for the GPIO pins
+u"""Loopback tests for the GPIO pins
 
 Topology:
 
@@ -8,6 +8,7 @@ Topology:
  - P6 and P7 are reserved for testing I2C and SPI interrupts
 """
 
+from __future__ import with_statement
 from quick2wire.gpio import pins, pi_header_1, In, Out
 from time import sleep
 import pytest
