@@ -101,7 +101,7 @@ def writing(addr, byte_seq):
     
     The bytes are passed to this function as a sequence.
     """
-    buf = str(byte_seq)
+    buf = "".join(map(chr, byte_seq))
     return _new_i2c_msg(addr, 0, create_string_buffer(buf, len(buf)))
 
 
